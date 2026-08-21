@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans text-gray-900 bg-white antialiased;
+  }
+}
+
+@layer components {
+  .container-news {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-brand-600 text-white font-medium rounded-md hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 transition-colors;
+  }
+
+  .card-news {
+    @apply bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow;
+  }
+
+  .section-title {
+    @apply text-xl md:text-2xl font-bold font-headline text-news-dark border-l-4 border-brand-600 pl-3 mb-4;
+  }
+
+  .article-content {
+    @apply max-w-none font-tamil leading-relaxed;
+  }
+
+  .article-content h1,
+  .article-content h2,
+  .article-content h3 {
+    @apply font-headline font-bold text-news-dark mt-6 mb-3;
+  }
+
+  .article-content p {
+    @apply mb-4 text-gray-700 leading-7;
+  }
+
+  .article-content blockquote {
+    @apply border-l-4 border-brand-500 pl-4 italic text-gray-600 my-4;
+  }
+
+  .article-content img {
+    @apply rounded-lg my-4 max-w-full h-auto;
+  }
+
+  .article-content a {
+    @apply text-brand-600 hover:underline;
+  }
+
+  .article-content table {
+    @apply w-full border-collapse my-4;
+  }
+
+  .article-content th,
+  .article-content td {
+    @apply border border-gray-200 px-3 py-2 text-sm;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-gray-200 rounded;
+  }
+
+  .nav-link {
+    @apply whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50 rounded transition-colors;
+  }
+
+  .nav-link-active {
+    @apply text-brand-600 bg-brand-50 font-semibold;
+  }
+}
+
+/* Breaking news ticker */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: inline-block;
+  animation: ticker 40s linear infinite;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(100vw); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Quill editor styles */
+.ql-editor {
+  min-height: 300px;
+  font-family: 'Noto Sans Tamil', sans-serif;
+}
