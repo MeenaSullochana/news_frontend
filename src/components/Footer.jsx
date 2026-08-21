@@ -52,7 +52,7 @@ const Footer = ({ settings }) => (
       </div>
 
       <div className="border-t border-gray-700 mt-8 pt-6 text-center text-sm">
-        <p>{settings?.footerText || '© 2024 The Great India News. All rights reserved.'}</p>
+        <p>{settings?.footerText || '© 2026 The Great India News. All rights reserved.'}</p>
       </div>
     </div>
   </footer>

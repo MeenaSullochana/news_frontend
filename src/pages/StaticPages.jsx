@@ -59,7 +59,7 @@ export const CorrectionPolicy = () => (
 
 export const Copyright = () => (
   <StaticPage title="Copyright">
-    <p>© 2024 The Great India News. All content, including text, images, and videos, is protected by copyright law. Unauthorized reproduction is prohibited.</p>
+    <p>© 2026 The Great India News. All content, including text, images, and videos, is protected by copyright law. Unauthorized reproduction is prohibited.</p>
   </StaticPage>
 );
 
