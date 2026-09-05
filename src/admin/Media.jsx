@@ -1,7 +1,9 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { mediaService } from '../services/articleService';
 import toast from 'react-hot-toast';
 import { getImageUrl } from '../utils/helpers';
+import AdminPageHeader from './AdminPageHeader';
+import DataTable from './DataTable';
 
 const Media = () => {
   const [media, setMedia] = useState([]);
@@ -10,7 +12,7 @@ const Media = () => {
 
   const fetchMedia = () => {
     setLoading(true);
-    mediaService.getAll({ limit: 50 })
+    mediaService.getAll({ limit: 100 })
       .then(({ data }) => setMedia(data.data || []))
       .finally(() => setLoading(false));
   };
@@ -45,44 +47,89 @@ const Media = () => {
     }
   };
 
+  const columns = useMemo(() => [
+    {
+      key: 'thumbnail',
+      header: 'Preview',
+      render: (row) => (
+        <div className="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
+          <img src={getImageUrl(row.thumbnailUrl || row.url)} alt={row.alt || row.originalName} className="w-full h-full object-cover" />
+        </div>
+      ),
+    },
+    {
+      key: 'originalName',
+      header: 'File Name',
+      sortable: true,
+      render: (row) => <span className="font-medium text-slate-900">{row.originalName}</span>,
+    },
+    {
+      key: 'mimetype',
+      header: 'Type',
+      sortable: true,
+      render: (row) => <span className="text-xs text-slate-500 uppercase">{row.mimetype?.split('/')[1] || 'image'}</span>,
+    },
+    {
+      key: 'size',
+      header: 'Size',
+      sortable: true,
+      sortValue: (row) => row.size || 0,
+      render: (row) => <span className="tabular-nums text-slate-600">{(row.size / 1024).toFixed(1)} KB</span>,
+    },
+    {
+      key: 'createdAt',
+      header: 'Uploaded',
+      sortable: true,
+      sortValue: (row) => row.createdAt ? new Date(row.createdAt).getTime() : 0,
+      render: (row) => (
+        <span className="text-slate-500 text-xs whitespace-nowrap">
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString('en-IN') : '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="data-table-actions">
+          <button
+            type="button"
+            onClick={() => { navigator.clipboard.writeText(row.url); toast.success('URL copied'); }}
+            className="data-table-action data-table-action-edit"
+          >
+            Copy URL
+          </button>
+          <button type="button" onClick={() => handleDelete(row._id)} className="data-table-action data-table-action-delete">
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ], []);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Media Library</h1>
-        <div>
-          <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" id="media-upload" />
-          <label htmlFor="media-upload" className="btn-primary cursor-pointer">Upload Image</label>
-        </div>
-      </div>
+      <AdminPageHeader title="Media Library" subtitle="Upload and manage images">
+        <input ref={fileRef} type="file" accept="image/*" onChange={handleUpload} className="hidden" id="media-upload" />
+        <label htmlFor="media-upload" className="btn-primary cursor-pointer text-sm py-2.5 px-4 w-full sm:w-auto text-center">
+          Upload Image
+        </label>
+      </AdminPageHeader>
 
-      {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => <div key={i} className="skeleton h-32 rounded-lg" />)}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {media.map((item) => (
-            <div key={item._id} className="bg-white rounded-lg shadow-sm overflow-hidden group">
-              <div className="aspect-square">
-                <img src={getImageUrl(item.thumbnailUrl || item.url)} alt={item.alt} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-2">
-                <p className="text-xs truncate">{item.originalName}</p>
-                <p className="text-[10px] text-gray-400">{(item.size / 1024).toFixed(1)} KB</p>
-                <div className="flex gap-1 mt-1">
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(item.url); toast.success('URL copied'); }}
-                    className="text-[10px] text-brand-600"
-                  >
-                    Copy URL
-                  </button>
-                  <button onClick={() => handleDelete(item._id)} className="text-[10px] text-red-500">Delete</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <DataTable
+        columns={columns}
+        data={media}
+        loading={loading}
+        searchPlaceholder="Search media files..."
+        searchKeys={['originalName', 'alt', 'mimetype']}
+        emptyMessage="No media files yet"
+        emptyAction={
+          <label htmlFor="media-upload" className="btn-primary mt-4 inline-flex cursor-pointer text-sm">
+            Upload first image
+          </label>
+        }
+        pageSize={10}
+      />
     </div>
   );
 };

@@ -1,18 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { categoryService } from '../services/articleService';
 import toast from 'react-hot-toast';
+import AdminPageHeader from './AdminPageHeader';
+import DataTable from './DataTable';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: '', nameTamil: '', slug: '', order: 0, status: 'active' });
   const [editId, setEditId] = useState(null);
 
   const fetchCategories = () => {
-    categoryService.getAll().then(({ data }) => setCategories(data.data || []));
+    setLoading(true);
+    categoryService.getAll()
+      .then(({ data }) => setCategories(data.data || []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchCategories(); }, []);
+
+  const resetForm = () => {
+    setForm({ name: '', nameTamil: '', slug: '', order: 0, status: 'active' });
+    setEditId(null);
+    setShowForm(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,9 +36,7 @@ const Categories = () => {
         await categoryService.create(form);
         toast.success('Category created');
       }
-      setShowForm(false);
-      setEditId(null);
-      setForm({ name: '', nameTamil: '', slug: '', order: 0, status: 'active' });
+      resetForm();
       fetchCategories();
     } catch {
       toast.error('Failed to save');
@@ -50,53 +60,66 @@ const Categories = () => {
     }
   };
 
+  const columns = useMemo(() => [
+    { key: 'nameTamil', header: 'Tamil Name', sortable: true, render: (row) => <span className="font-medium text-slate-900">{row.nameTamil}</span> },
+    { key: 'name', header: 'English', sortable: true },
+    { key: 'slug', header: 'Slug', sortable: true, render: (row) => <code className="text-xs bg-slate-100 px-2 py-0.5 rounded">{row.slug}</code> },
+    { key: 'order', header: 'Order', sortable: true, sortValue: (row) => row.order || 0 },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (row) => (
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+          {row.status}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="data-table-actions">
+          <button type="button" onClick={() => handleEdit(row)} className="data-table-action data-table-action-edit">Edit</button>
+          <button type="button" onClick={() => handleDelete(row._id)} className="data-table-action data-table-action-delete">Delete</button>
+        </div>
+      ),
+    },
+  ], []);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Categories</h1>
-        <button onClick={() => { setShowForm(true); setEditId(null); }} className="btn-primary">+ Add Category</button>
-      </div>
+      <AdminPageHeader
+        title="Categories"
+        subtitle="Manage news categories"
+        actionLabel={showForm ? undefined : '+ Add Category'}
+        onAction={() => { setShowForm(true); setEditId(null); }}
+      />
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-4 mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input placeholder="Name (English)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="px-3 py-2 border rounded-md text-sm" />
-          <input placeholder="Name (Tamil)" value={form.nameTamil} onChange={(e) => setForm({ ...form, nameTamil: e.target.value })} required className="px-3 py-2 border rounded-md text-sm" />
-          <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="px-3 py-2 border rounded-md text-sm" />
-          <input type="number" placeholder="Order" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) })} className="px-3 py-2 border rounded-md text-sm" />
-          <div className="flex gap-2 md:col-span-2">
+        <form onSubmit={handleSubmit} className="admin-card mb-6">
+          <h2 className="font-semibold text-slate-900 mb-4">{editId ? 'Edit Category' : 'New Category'}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <input placeholder="Name (English)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="admin-input" />
+            <input placeholder="Name (Tamil)" value={form.nameTamil} onChange={(e) => setForm({ ...form, nameTamil: e.target.value })} required className="admin-input" />
+            <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="admin-input" />
+            <input type="number" placeholder="Order" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) || 0 })} className="admin-input" />
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
             <button type="submit" className="btn-primary text-sm">Save</button>
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
+            <button type="button" onClick={resetForm} className="btn-secondary text-sm">Cancel</button>
           </div>
         </form>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left">Tamil Name</th>
-              <th className="px-4 py-3 text-left hidden md:table-cell">English</th>
-              <th className="px-4 py-3 text-left">Slug</th>
-              <th className="px-4 py-3 text-left">Order</th>
-              <th className="px-4 py-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {categories.map((cat) => (
-              <tr key={cat._id}>
-                <td className="px-4 py-3 font-medium">{cat.nameTamil}</td>
-                <td className="px-4 py-3 hidden md:table-cell">{cat.name}</td>
-                <td className="px-4 py-3 text-gray-500">{cat.slug}</td>
-                <td className="px-4 py-3">{cat.order}</td>
-                <td className="px-4 py-3">
-                  <button onClick={() => handleEdit(cat)} className="text-brand-600 text-xs mr-2">Edit</button>
-                  <button onClick={() => handleDelete(cat._id)} className="text-red-500 text-xs">Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={categories}
+        loading={loading}
+        searchPlaceholder="Search categories..."
+        searchKeys={['name', 'nameTamil', 'slug']}
+        emptyMessage="No categories found"
+      />
     </div>
   );
 };

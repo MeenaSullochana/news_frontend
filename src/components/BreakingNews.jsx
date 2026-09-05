@@ -17,10 +17,10 @@ const BreakingNews = () => {
   const text = news.map((n) => n.text).join('  •  ');
 
   return (
-    <div className="bg-brand-700 text-white overflow-hidden">
-      <div className="container-news flex items-center py-2">
-        <span className="flex-shrink-0 bg-white text-brand-700 text-xs font-bold px-2 py-0.5 rounded mr-3 uppercase tracking-wide">
-          🔴 Breaking
+    <div className="bg-gradient-to-r from-rose-600 to-orange-500 text-white overflow-hidden">
+      <div className="container-news flex items-center py-2.5">
+        <span className="flex-shrink-0 bg-white text-rose-600 text-[10px] font-extrabold px-2.5 py-1 rounded-full mr-3 uppercase tracking-widest shadow-sm">
+          Breaking
         </span>
         <div className="overflow-hidden flex-1">
           <div className="ticker-wrap">

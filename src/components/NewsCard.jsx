@@ -8,13 +8,14 @@ const NewsCard = ({ article, variant = 'default' }) => {
   if (variant === 'horizontal') {
     return (
       <Link to={`/news/${article.slug}`} className="flex gap-3 group">
-        <div className="flex-shrink-0 w-24 h-16 md:w-32 md:h-20 overflow-hidden rounded-md">
+        <div className="flex-shrink-0 w-24 h-16 md:w-32 md:h-20 overflow-hidden rounded-xl ring-1 ring-black/5">
           <NewsImage
             src={article.featuredImage}
             seed={article.slug}
             alt={article.imageAlt || article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover"
             loading="lazy"
+            decoding="async"
           />
         </div>
         <div className="flex-1 min-w-0">
@@ -23,10 +24,10 @@ const NewsCard = ({ article, variant = 'default' }) => {
               {article.category.nameTamil || article.category.name}
             </span>
           )}
-          <h3 className="text-sm md:text-base font-semibold text-gray-900 group-hover:text-brand-600 line-clamp-2 leading-snug mt-0.5">
+          <h3 className="text-sm md:text-base font-semibold text-slate-900 group-hover:text-brand-700 line-clamp-2 leading-snug mt-0.5">
             {article.title}
           </h3>
-          <span className="text-xs text-gray-400 mt-1 block">{timeAgo(article.publishedAt)}</span>
+          <span className="text-xs text-slate-500 mt-1 block">{timeAgo(article.publishedAt)}</span>
         </div>
       </Link>
     );
@@ -50,7 +51,7 @@ const NewsCard = ({ article, variant = 'default' }) => {
           src={article.featuredImage}
           seed={article.slug}
           alt={article.imageAlt || article.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover"
           loading="lazy"
         />
       </div>

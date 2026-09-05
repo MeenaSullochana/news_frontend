@@ -5,7 +5,15 @@ import { LatestNews, PopularNews } from '../components/LatestNews';
 import CategorySection from '../components/CategorySection';
 import DistrictNews from '../components/DistrictNews';
 import Advertisement from '../components/Advertisement';
+import AdSenseSlot from '../components/AdSenseSlot';
 import NewsCard from '../components/NewsCard';
+import YoutubeVideoSlider from '../components/YoutubeVideoSlider';
+import MustWatchSection from '../components/MustWatchSection';
+import InstagramPostsSection from '../components/InstagramPostsSection';
+import GoogleNewsSection from '../components/GoogleNewsSection';
+import TravelUpdatesSection from '../components/TravelUpdatesSection';
+import SportsWidgets from '../components/SportsWidgets';
+import GovernmentNotificationsSection from '../components/GovernmentNotificationsSection';
 import { SkeletonCard } from '../components/Loading';
 import { CATEGORY_SLUGS } from '../utils/helpers';
 import { Helmet } from 'react-helmet-async';
@@ -79,6 +87,8 @@ const Home = () => {
 
       <div className="container-news py-6">
         <Advertisement position="homepage_top" className="mb-6" />
+        <AdSenseSlot location="homepage" page="home" className="mb-6" />
+        <AdSenseSlot location="homepage_top" page="home" className="mb-6" />
 
         {loading ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -113,6 +123,21 @@ const Home = () => {
         )}
 
         <Advertisement position="homepage_middle" className="mb-8" />
+        <AdSenseSlot location="homepage_middle" page="home" className="mb-8" />
+
+        <MustWatchSection />
+
+        <YoutubeVideoSlider />
+
+        <InstagramPostsSection />
+
+        <GoogleNewsSection />
+
+        <TravelUpdatesSection />
+
+        <SportsWidgets page="homepage" />
+
+        <GovernmentNotificationsSection />
 
         <DistrictNews />
 

@@ -46,6 +46,7 @@ export const truncate = (text, length = 100) => {
 
 export const NAV_ITEMS = [
   { label: 'முகப்பு', path: '/' },
+  { label: 'அனைத்தும்', path: '/explore' },
   { label: 'தமிழ்நாடு', path: '/tamil-nadu' },
   { label: 'சென்னை', path: '/chennai' },
   { label: 'இந்தியா', path: '/india' },

@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { articleService } from '../services/articleService';
 import toast from 'react-hot-toast';
 import { formatDateTime } from '../utils/helpers';
+import AdminPageHeader, { StatusBadge } from './AdminPageHeader';
+import DataTable from './DataTable';
 
 const STATUS_TABS = ['', 'PUBLISHED', 'DRAFT', 'PENDING', 'SCHEDULED', 'TRASH'];
 
@@ -36,93 +38,119 @@ const Articles = () => {
     }
   };
 
+  const columns = useMemo(() => [
+    {
+      key: 'title',
+      header: 'Title',
+      sortable: true,
+      cellClassName: 'max-w-xs sm:max-w-md',
+      render: (row) => (
+        <p className="font-medium text-slate-900 line-clamp-2 leading-snug">{row.title}</p>
+      ),
+    },
+    {
+      key: 'category.nameTamil',
+      header: 'Category',
+      sortable: true,
+      sortValue: (row) => row.category?.nameTamil || row.category?.name || '',
+      render: (row) => (
+        <span className="text-slate-600 whitespace-nowrap">
+          {row.category?.nameTamil || row.category?.name || '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'author.name',
+      header: 'Author',
+      sortable: true,
+      sortValue: (row) => row.author?.name || '',
+      render: (row) => row.author?.name || '-',
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (row) => <StatusBadge status={row.status} />,
+    },
+    {
+      key: 'publishedAt',
+      header: 'Published',
+      sortable: true,
+      sortValue: (row) => row.publishedAt ? new Date(row.publishedAt).getTime() : 0,
+      render: (row) => (
+        <span className="text-slate-500 whitespace-nowrap text-xs sm:text-sm">
+          {row.publishedAt ? formatDateTime(row.publishedAt) : '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'views',
+      header: 'Views',
+      sortable: true,
+      sortValue: (row) => row.views || 0,
+      render: (row) => (
+        <span className="font-medium tabular-nums">{row.views?.toLocaleString('en-IN') || 0}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="data-table-actions">
+          <Link to={`/admin/articles/edit/${row._id}`} className="data-table-action data-table-action-edit">
+            Edit
+          </Link>
+          <button type="button" onClick={() => handleDelete(row._id)} className="data-table-action data-table-action-delete">
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ], []);
+
+  const statusToolbar = (
+    <div className="flex gap-1.5 overflow-x-auto scrollbar-hide max-w-full">
+      {STATUS_TABS.map((s) => (
+        <button
+          key={s || 'all'}
+          type="button"
+          onClick={() => setStatus(s)}
+          className={`flex-shrink-0 px-3 py-1.5 text-xs rounded-full font-medium transition-colors ${
+            status === s
+              ? 'bg-brand-600 text-white'
+              : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+          }`}
+        >
+          {s || 'All'}
+        </button>
+      ))}
+    </div>
+  );
+
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold">Articles</h1>
-        <Link to="/admin/articles/create" className="btn-primary">+ Add Article</Link>
-      </div>
+      <AdminPageHeader
+        title="Articles"
+        subtitle="Manage all news articles"
+        actionLabel="+ Add Article"
+        actionTo="/admin/articles/create"
+      />
 
-      <div className="flex gap-2 overflow-x-auto mb-4 pb-2">
-        {STATUS_TABS.map((s) => (
-          <button
-            key={s || 'all'}
-            onClick={() => setStatus(s)}
-            className={`px-3 py-1.5 text-sm rounded-full whitespace-nowrap ${
-              status === s ? 'bg-brand-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            {s || 'All'}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="skeleton h-16 rounded-lg" />
-          ))}
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium hidden md:table-cell">Status</th>
-                  <th className="px-4 py-3 font-medium hidden lg:table-cell">Published</th>
-                  <th className="px-4 py-3 font-medium hidden lg:table-cell">Views</th>
-                  <th className="px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {articles.map((article) => (
-                  <tr key={article._id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <p className="font-medium line-clamp-1">{article.title}</p>
-                      <p className="text-xs text-gray-400 md:hidden">{article.status}</p>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        article.status === 'PUBLISHED' ? 'bg-green-100 text-green-700' :
-                        article.status === 'DRAFT' ? 'bg-gray-100 text-gray-600' :
-                        article.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>
-                        {article.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-500 hidden lg:table-cell">
-                      {article.publishedAt ? formatDateTime(article.publishedAt) : '-'}
-                    </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">{article.views || 0}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2">
-                        <Link
-                          to={`/admin/articles/edit/${article._id}`}
-                          className="text-brand-600 hover:underline text-xs"
-                        >
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(article._id)}
-                          className="text-red-500 hover:underline text-xs"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {articles.length === 0 && (
-            <p className="text-center py-8 text-gray-500">No articles found</p>
-          )}
-        </div>
-      )}
+      <DataTable
+        columns={columns}
+        data={articles}
+        loading={loading}
+        searchPlaceholder="Search articles..."
+        searchKeys={['title', 'author.name', 'category.nameTamil', 'category.name', 'status']}
+        emptyMessage="No articles found"
+        emptyAction={
+          <Link to="/admin/articles/create" className="btn-primary mt-4 inline-flex text-sm">
+            Create first article
+          </Link>
+        }
+        toolbar={statusToolbar}
+        pageSize={10}
+      />
     </div>
   );
 };

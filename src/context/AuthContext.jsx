@@ -29,15 +29,32 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const registerSeller = async (payload) => {
+    const data = await authService.registerSeller(payload);
+    setUser(data.user);
+    return data;
+  };
+
+  const registerMatrimonyMember = async (payload) => {
+    const data = await authService.registerMatrimonyMember(payload);
+    setUser(data.user);
+    return data;
+  };
+
   const logout = async () => {
     await authService.logout();
     setUser(null);
   };
 
+  const updateUser = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+  };
+
   const hasRole = (...roles) => user && roles.includes(user.role);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, loading, login, registerSeller, registerMatrimonyMember, logout, updateUser, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

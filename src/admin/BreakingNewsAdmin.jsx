@@ -1,18 +1,32 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { breakingNewsService } from '../services/articleService';
 import toast from 'react-hot-toast';
+import AdminPageHeader, { StatusBadge } from './AdminPageHeader';
+import DataTable from './DataTable';
+
+const emptyForm = { text: '', link: '', priority: 0, isActive: true, endTime: '' };
 
 const BreakingNewsAdmin = () => {
   const [items, setItems] = useState([]);
-  const [form, setForm] = useState({ text: '', link: '', priority: 0, isActive: true, endTime: '' });
+  const [loading, setLoading] = useState(true);
+  const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const fetchItems = () => {
-    breakingNewsService.getAll().then(({ data }) => setItems(data.data || []));
+    setLoading(true);
+    breakingNewsService.getAll()
+      .then(({ data }) => setItems(data.data || []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchItems(); }, []);
+
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditId(null);
+    setShowForm(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,9 +39,7 @@ const BreakingNewsAdmin = () => {
         await breakingNewsService.create(payload);
         toast.success('Created');
       }
-      setShowForm(false);
-      setEditId(null);
-      setForm({ text: '', link: '', priority: 0, isActive: true, endTime: '' });
+      resetForm();
       fetchItems();
     } catch {
       toast.error('Failed');
@@ -46,49 +58,105 @@ const BreakingNewsAdmin = () => {
     fetchItems();
   };
 
+  const openEdit = (item) => {
+    setForm({
+      text: item.text || '',
+      link: item.link || '',
+      priority: item.priority || 0,
+      isActive: item.isActive ?? true,
+      endTime: item.endTime ? item.endTime.slice(0, 16) : '',
+    });
+    setEditId(item._id);
+    setShowForm(true);
+  };
+
+  const columns = useMemo(() => [
+    {
+      key: 'text',
+      header: 'Headline',
+      sortable: true,
+      cellClassName: 'max-w-md',
+      render: (row) => <p className="font-medium text-slate-900 line-clamp-2">{row.text}</p>,
+    },
+    {
+      key: 'priority',
+      header: 'Priority',
+      sortable: true,
+      sortValue: (row) => row.priority || 0,
+      render: (row) => <span className="font-semibold tabular-nums">{row.priority}</span>,
+    },
+    {
+      key: 'isActive',
+      header: 'Status',
+      sortable: true,
+      sortValue: (row) => (row.isActive ? 1 : 0),
+      render: (row) => <StatusBadge active={row.isActive} />,
+    },
+    {
+      key: 'endTime',
+      header: 'End Time',
+      sortable: true,
+      sortValue: (row) => row.endTime ? new Date(row.endTime).getTime() : 0,
+      render: (row) => (
+        <span className="text-slate-500 text-xs whitespace-nowrap">
+          {row.endTime ? new Date(row.endTime).toLocaleString('en-IN') : 'No expiry'}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <div className="data-table-actions">
+          <button type="button" onClick={() => handleToggle(row)} className="data-table-action data-table-action-secondary">
+            {row.isActive ? 'Disable' : 'Enable'}
+          </button>
+          <button type="button" onClick={() => openEdit(row)} className="data-table-action data-table-action-edit">Edit</button>
+          <button type="button" onClick={() => handleDelete(row._id)} className="data-table-action data-table-action-delete">Delete</button>
+        </div>
+      ),
+    },
+  ], []);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Breaking News</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">+ Add</button>
-      </div>
+      <AdminPageHeader
+        title="Breaking News"
+        subtitle="Ticker headlines on the homepage"
+        actionLabel={showForm ? undefined : '+ Add Breaking News'}
+        onAction={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }}
+      />
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-4 mb-6 space-y-3">
-          <textarea placeholder="Breaking news text" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required rows={2} className="w-full px-3 py-2 border rounded-md text-sm" />
-          <input placeholder="Link (optional)" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} className="w-full px-3 py-2 border rounded-md text-sm" />
-          <div className="grid grid-cols-2 gap-3">
-            <input type="number" placeholder="Priority" value={form.priority} onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) })} className="px-3 py-2 border rounded-md text-sm" />
-            <input type="datetime-local" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} className="px-3 py-2 border rounded-md text-sm" />
+        <form onSubmit={handleSubmit} className="admin-card mb-6">
+          <h2 className="font-semibold text-slate-900 mb-4">{editId ? 'Edit' : 'New'} Breaking News</h2>
+          <div className="space-y-4">
+            <textarea placeholder="Breaking news text" value={form.text} onChange={(e) => setForm({ ...form, text: e.target.value })} required rows={2} className="admin-input" />
+            <input placeholder="Link (optional)" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} className="admin-input" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <input type="number" placeholder="Priority" value={form.priority} onChange={(e) => setForm({ ...form, priority: parseInt(e.target.value) || 0 })} className="admin-input" />
+              <input type="datetime-local" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} className="admin-input" />
+            </div>
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="rounded border-slate-300 text-brand-600" />
+              Active
+            </label>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
-            Active
-          </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
             <button type="submit" className="btn-primary text-sm">Save</button>
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
+            <button type="button" onClick={resetForm} className="btn-secondary text-sm">Cancel</button>
           </div>
         </form>
       )}
 
-      <div className="space-y-3">
-        {items.map((item) => (
-          <div key={item._id} className="bg-white rounded-xl shadow-sm p-4 flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <p className="font-medium">{item.text}</p>
-              <p className="text-xs text-gray-400 mt-1">Priority: {item.priority} • {item.isActive ? 'Active' : 'Inactive'}</p>
-            </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button onClick={() => handleToggle(item)} className="text-xs btn-secondary py-1 px-2">
-                {item.isActive ? 'Disable' : 'Enable'}
-              </button>
-              <button onClick={() => { setForm(item); setEditId(item._id); setShowForm(true); }} className="text-xs text-brand-600">Edit</button>
-              <button onClick={() => handleDelete(item._id)} className="text-xs text-red-500">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <DataTable
+        columns={columns}
+        data={items}
+        loading={loading}
+        searchPlaceholder="Search breaking news..."
+        searchKeys={['text', 'link']}
+        emptyMessage="No breaking news items"
+      />
     </div>
   );
 };

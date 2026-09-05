@@ -17,6 +17,8 @@ export default defineConfig(({ mode }) => {
         '/news-sitemap.xml': { target: apiTarget, changeOrigin: true },
         '/robots.txt': { target: apiTarget, changeOrigin: true },
         '/rss.xml': { target: apiTarget, changeOrigin: true },
+        '/feed.xml': { target: apiTarget, changeOrigin: true },
+        '/feed': { target: apiTarget, changeOrigin: true },
       },
     },
     preview: {

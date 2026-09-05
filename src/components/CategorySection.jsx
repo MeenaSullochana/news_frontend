@@ -20,7 +20,7 @@ const CategorySection = ({ title, articles, slug, loading }) => {
   const [main, ...rest] = articles;
 
   return (
-    <section className="mb-10">
+    <section className="mb-10 [content-visibility:auto] [contain-intrinsic-size:auto_420px]">
       <div className="flex items-center justify-between mb-4">
         <h2 className="section-title">{title}</h2>
         {slug && (

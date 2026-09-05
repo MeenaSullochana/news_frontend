@@ -4,10 +4,24 @@
 
 @layer base {
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  @media (max-width: 1023px) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   body {
-    @apply font-sans text-gray-900 bg-white antialiased;
+    @apply font-sans antialiased text-slate-900 bg-stone-100;
+    /* Solid bg only — fixed multi-layer gradients cause severe scroll jank */
+  }
+  ::selection {
+    @apply bg-teal-200 text-slate-900;
   }
 }
 
@@ -17,19 +31,54 @@
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-brand-600 text-white font-medium rounded-md hover:bg-brand-700 transition-colors focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2;
+    @apply inline-flex items-center justify-center px-4 py-2.5 bg-teal-700 text-white font-semibold rounded-2xl
+      hover:bg-teal-800 transition-all focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2;
+    box-shadow: 0 1px 2px rgba(12, 18, 34, 0.04), 0 8px 24px rgba(12, 18, 34, 0.06);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-md hover:bg-gray-200 transition-colors;
+    @apply inline-flex items-center justify-center px-4 py-2.5 font-semibold rounded-2xl transition-all;
+    background-color: rgb(255 255 255);
+    color: rgb(71 85 105);
+    border: 1px solid rgb(231 229 228);
+  }
+
+  .btn-secondary:hover {
+    border-color: rgb(94 234 212);
+    color: rgb(17 94 89);
+  }
+
+  .admin-shell .btn-secondary {
+    background-color: rgb(var(--adm-surface));
+    border-color: rgb(var(--adm-border));
+    color: rgb(var(--adm-text-2));
+  }
+
+  .admin-shell .btn-secondary:hover {
+    border-color: rgb(45 212 191);
+    color: rgb(45 212 191);
   }
 
   .card-news {
-    @apply bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow;
+    @apply bg-white rounded-2xl overflow-hidden;
+    box-shadow: 0 1px 3px rgba(12, 18, 34, 0.06);
+    outline: 1px solid rgba(12, 18, 34, 0.04);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-news {
+      @apply transition-shadow duration-200;
+    }
+    .card-news:hover {
+      box-shadow: 0 4px 12px rgba(12, 18, 34, 0.1);
+    }
   }
 
   .section-title {
-    @apply text-xl md:text-2xl font-bold font-headline text-news-dark border-l-4 border-brand-600 pl-3 mb-4;
+    @apply text-xl md:text-2xl font-bold font-headline text-slate-900 mb-4 relative pl-4;
+  }
+  .section-title::before {
+    content: '';
+    @apply absolute left-0 top-1 bottom-1 w-1 rounded-full bg-teal-500;
   }
 
   .article-content {
@@ -39,48 +88,614 @@
   .article-content h1,
   .article-content h2,
   .article-content h3 {
-    @apply font-headline font-bold text-news-dark mt-6 mb-3;
+    @apply font-headline font-bold text-slate-900 mt-6 mb-3;
   }
 
   .article-content p {
-    @apply mb-4 text-gray-700 leading-7;
+    @apply mb-4 text-slate-600 leading-7;
   }
 
   .article-content blockquote {
-    @apply border-l-4 border-brand-500 pl-4 italic text-gray-600 my-4;
+    @apply border-l-4 border-teal-400 pl-4 italic text-slate-600 my-4 py-2 rounded-r-xl bg-teal-50;
   }
 
   .article-content img {
-    @apply rounded-lg my-4 max-w-full h-auto;
+    @apply rounded-2xl my-4 max-w-full h-auto;
   }
 
   .article-content a {
-    @apply text-brand-600 hover:underline;
+    @apply text-teal-700 font-medium hover:underline;
   }
 
   .article-content table {
-    @apply w-full border-collapse my-4;
+    @apply w-full border-collapse my-4 overflow-hidden rounded-xl;
   }
 
   .article-content th,
   .article-content td {
-    @apply border border-gray-200 px-3 py-2 text-sm;
+    @apply border border-stone-200 px-3 py-2 text-sm;
   }
 
   .skeleton {
-    @apply animate-pulse bg-gray-200 rounded;
+    @apply animate-pulse bg-stone-200 rounded-2xl;
   }
 
   .nav-link {
-    @apply whitespace-nowrap px-3 py-2 text-sm font-medium text-gray-700 hover:text-brand-600 hover:bg-gray-50 rounded transition-colors;
+    @apply whitespace-nowrap px-3.5 py-2 text-sm font-medium text-slate-600
+      hover:text-teal-800 hover:bg-teal-50 rounded-full transition-all;
   }
 
   .nav-link-active {
-    @apply text-brand-600 bg-brand-50 font-semibold;
+    @apply text-teal-900 bg-teal-100 font-semibold shadow-sm;
+  }
+
+  .hub-card {
+    @apply bg-white rounded-2xl overflow-hidden h-full flex flex-col;
+    box-shadow: 0 1px 3px rgba(12, 18, 34, 0.06);
+    outline: 1px solid rgba(12, 18, 34, 0.05);
+  }
+
+  .hub-card-header {
+    @apply flex items-center justify-between gap-2 px-4 sm:px-5 py-3.5 border-b border-stone-200 bg-stone-50/80;
+  }
+
+  .hub-pill {
+    @apply inline-flex items-center gap-1.5 shrink-0 whitespace-nowrap text-xs font-semibold
+      px-3.5 py-2 rounded-full bg-white text-slate-600 border border-stone-200
+      hover:border-teal-400 hover:text-teal-800 hover:bg-teal-50 transition-all;
+  }
+
+  .util-tile {
+    @apply relative overflow-hidden rounded-2xl bg-white p-4 h-full;
+    box-shadow: 0 1px 3px rgba(12, 18, 34, 0.06);
+    outline: 1px solid rgba(12, 18, 34, 0.04);
+  }
+
+  .util-tile::before {
+    content: '';
+    @apply absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-600;
+  }
+
+  .admin-shell {
+    --adm-bg: 241 245 249;
+    --adm-surface: 255 255 255;
+    --adm-surface-2: 248 250 252;
+    --adm-surface-hover: 241 245 249;
+    --adm-border: 226 232 240;
+    --adm-border-light: 241 245 249;
+    --adm-border-input: 203 213 225;
+    --adm-text: 15 23 42;
+    --adm-text-2: 51 65 85;
+    --adm-text-3: 71 85 105;
+    --adm-text-muted: 100 116 139;
+    --adm-text-faint: 148 163 184;
+    --adm-input-bg: 255 255 255;
+    --adm-table-head: 248 250 252;
+    --adm-table-row-even: 248 250 252;
+    --adm-table-hover: 240 253 250;
+    --adm-header-bg: 255 255 255;
+    color-scheme: light;
+  }
+
+  .admin-shell.dark {
+    --adm-bg: 15 23 42;
+    --adm-surface: 30 41 59;
+    --adm-surface-2: 30 41 59;
+    --adm-surface-hover: 51 65 85;
+    --adm-border: 51 65 85;
+    --adm-border-light: 51 65 85;
+    --adm-border-input: 71 85 105;
+    --adm-text: 241 245 249;
+    --adm-text-2: 203 213 225;
+    --adm-text-3: 148 163 184;
+    --adm-text-muted: 148 163 184;
+    --adm-text-faint: 100 116 139;
+    --adm-input-bg: 15 23 42;
+    --adm-table-head: 15 23 42;
+    --adm-table-row-even: 30 41 59;
+    --adm-table-hover: 51 65 85;
+    --adm-header-bg: 30 41 59;
+    color-scheme: dark;
+  }
+
+  .admin-page-bg {
+    background-color: rgb(var(--adm-bg));
+    min-height: 100vh;
+    transition: background-color 0.2s ease;
+  }
+
+  .admin-header-bar {
+    background-color: rgb(var(--adm-header-bg));
+    border-bottom: 1px solid rgb(var(--adm-border));
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .admin-tab {
+    flex-shrink: 0;
+    padding: 0.5rem 0.875rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid rgb(var(--adm-border));
+    background-color: rgb(var(--adm-surface));
+    color: rgb(var(--adm-text-3));
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .admin-tab:hover {
+    border-color: rgb(var(--adm-border-input));
+  }
+
+  .admin-tab-active {
+    background-color: rgb(15 23 42);
+    border-color: rgb(15 23 42);
+    color: rgb(255 255 255);
+  }
+
+  .admin-shell.dark .admin-tab-active {
+    background-color: rgb(13 148 136);
+    border-color: rgb(13 148 136);
+    color: rgb(255 255 255);
+  }
+
+  .admin-card {
+    background-color: rgb(var(--adm-surface));
+    border: 1px solid rgb(var(--adm-border));
+    color: rgb(var(--adm-text));
+    @apply rounded-2xl p-4 sm:p-6;
+    box-shadow: 0 1px 2px rgba(12, 18, 34, 0.04), 0 8px 24px rgba(12, 18, 34, 0.06);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .admin-shell.dark .admin-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .admin-stat-card {
+    background-color: rgb(var(--adm-surface));
+    border: 1px solid rgb(var(--adm-border));
+    color: rgb(var(--adm-text));
+    @apply rounded-xl p-4 sm:p-5 transition-all;
+    box-shadow: 0 1px 2px rgba(12, 18, 34, 0.04), 0 8px 24px rgba(12, 18, 34, 0.06);
+  }
+
+  .admin-shell.dark .admin-stat-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ── Dark mode: semantic tint backgrounds (badges, stat cards, alerts) ── */
+  .admin-shell.dark .bg-amber-50,
+  .admin-shell.dark .bg-amber-100 {
+    background-color: rgb(69 26 3 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-emerald-50,
+  .admin-shell.dark .bg-emerald-100,
+  .admin-shell.dark .bg-emerald-50\/60 {
+    background-color: rgb(6 44 30 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-rose-50 {
+    background-color: rgb(76 5 25 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-teal-50 {
+    background-color: rgb(19 78 74 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-sky-50 {
+    background-color: rgb(12 44 63 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-violet-50 {
+    background-color: rgb(46 16 101 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-indigo-50 {
+    background-color: rgb(30 27 75 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-orange-50 {
+    background-color: rgb(67 20 7 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-purple-100 {
+    background-color: rgb(59 7 100 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-green-100 {
+    background-color: rgb(5 46 22 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-red-100 {
+    background-color: rgb(69 10 10 / 0.45) !important;
+  }
+
+  .admin-shell.dark .bg-brand-50,
+  .admin-shell.dark .bg-brand-100 {
+    background-color: rgb(19 78 74 / 0.45) !important;
+  }
+
+  /* Tint borders */
+  .admin-shell.dark .border-amber-200 { border-color: rgb(146 64 14 / 0.45) !important; }
+  .admin-shell.dark .border-emerald-200 { border-color: rgb(6 95 70 / 0.45) !important; }
+  .admin-shell.dark .border-rose-200 { border-color: rgb(159 18 57 / 0.45) !important; }
+  .admin-shell.dark .border-teal-100,
+  .admin-shell.dark .border-teal-200 { border-color: rgb(15 118 110 / 0.45) !important; }
+  .admin-shell.dark .border-sky-200 { border-color: rgb(3 105 161 / 0.45) !important; }
+  .admin-shell.dark .border-violet-200 { border-color: rgb(109 40 217 / 0.45) !important; }
+  .admin-shell.dark .border-indigo-200 { border-color: rgb(67 56 202 / 0.45) !important; }
+  .admin-shell.dark .border-orange-200 { border-color: rgb(194 65 12 / 0.45) !important; }
+  .admin-shell.dark .border-purple-200 { border-color: rgb(126 34 206 / 0.45) !important; }
+  .admin-shell.dark .border-green-200 { border-color: rgb(21 128 61 / 0.45) !important; }
+  .admin-shell.dark .border-red-200 { border-color: rgb(185 28 28 / 0.45) !important; }
+  .admin-shell.dark .border-brand-200 { border-color: rgb(15 118 110 / 0.45) !important; }
+
+  /* Tint text */
+  .admin-shell.dark .text-amber-600,
+  .admin-shell.dark .text-amber-700,
+  .admin-shell.dark .text-amber-800,
+  .admin-shell.dark .text-amber-900 { color: rgb(252 211 77) !important; }
+
+  .admin-shell.dark .text-emerald-700,
+  .admin-shell.dark .text-emerald-900 { color: rgb(110 231 183) !important; }
+
+  .admin-shell.dark .text-rose-600,
+  .admin-shell.dark .text-rose-700,
+  .admin-shell.dark .text-rose-900 { color: rgb(251 113 133) !important; }
+
+  .admin-shell.dark .text-teal-700,
+  .admin-shell.dark .text-teal-800,
+  .admin-shell.dark .text-teal-900 { color: rgb(94 234 212) !important; }
+
+  .admin-shell.dark .text-sky-700,
+  .admin-shell.dark .text-sky-900 { color: rgb(125 211 252) !important; }
+
+  .admin-shell.dark .text-violet-700 { color: rgb(196 181 253) !important; }
+
+  .admin-shell.dark .text-indigo-600,
+  .admin-shell.dark .text-indigo-700 { color: rgb(165 180 252) !important; }
+
+  .admin-shell.dark .text-orange-700 { color: rgb(253 186 116) !important; }
+
+  .admin-shell.dark .text-purple-600,
+  .admin-shell.dark .text-purple-700 { color: rgb(216 180 254) !important; }
+
+  .admin-shell.dark .text-green-600,
+  .admin-shell.dark .text-green-700 { color: rgb(134 239 172) !important; }
+
+  .admin-shell.dark .text-red-600,
+  .admin-shell.dark .text-red-700 { color: rgb(252 165 165) !important; }
+
+  .admin-shell.dark .text-brand-600,
+  .admin-shell.dark .text-brand-700 { color: rgb(45 212 191) !important; }
+
+  .admin-shell.dark .text-blue-600 { color: rgb(96 165 250) !important; }
+
+  /* Active tab / filter pills (not code blocks — require .text-white) */
+  .admin-shell.dark :is(button, a, span, div, li).bg-slate-900.text-white {
+    background-color: rgb(13 148 136) !important;
+  }
+
+  .admin-shell.dark :is(button, a, span, div, li).border-slate-900 {
+    border-color: rgb(13 148 136) !important;
+  }
+
+  /* Neutral extras */
+  .admin-shell.dark .bg-slate-200 {
+    background-color: rgb(var(--adm-border)) !important;
+  }
+
+  .admin-shell.dark .bg-slate-300 {
+    background-color: rgb(var(--adm-border-input)) !important;
+  }
+
+  .admin-shell.dark .text-slate-300 {
+    color: rgb(var(--adm-text-faint)) !important;
+  }
+
+  .admin-shell.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: rgb(var(--adm-border-light)) !important;
+  }
+
+  .admin-shell.dark .hover\:bg-slate-200:hover {
+    background-color: rgb(var(--adm-surface-hover)) !important;
+  }
+
+  /* Colored hovers */
+  .admin-shell.dark .hover\:bg-rose-50:hover { background-color: rgb(76 5 25 / 0.45) !important; }
+  .admin-shell.dark .hover\:bg-teal-50:hover { background-color: rgb(19 78 74 / 0.35) !important; }
+  .admin-shell.dark .hover\:bg-brand-50:hover,
+  .admin-shell.dark .hover\:bg-brand-100:hover { background-color: rgb(19 78 74 / 0.45) !important; }
+  .admin-shell.dark .hover\:bg-emerald-50:hover { background-color: rgb(6 44 30 / 0.45) !important; }
+
+  /* Dashboard stat left-border accents */
+  .admin-shell.dark .border-blue-500 { border-color: rgb(59 130 246 / 0.65) !important; }
+  .admin-shell.dark .border-green-500 { border-color: rgb(34 197 94 / 0.65) !important; }
+  .admin-shell.dark .border-amber-500 { border-color: rgb(245 158 11 / 0.65) !important; }
+  .admin-shell.dark .border-purple-500 { border-color: rgb(168 85 247 / 0.65) !important; }
+  .admin-shell.dark .border-red-500 { border-color: rgb(239 68 68 / 0.65) !important; }
+  .admin-shell.dark .border-indigo-500 { border-color: rgb(99 102 241 / 0.65) !important; }
+  .admin-shell.dark .border-brand-500 { border-color: rgb(20 184 166 / 0.65) !important; }
+
+  /* Gemini panel gradient + panel */
+  .admin-shell.dark .border-teal-200 {
+    border-color: rgb(15 118 110 / 0.45) !important;
+  }
+
+  .admin-shell.dark .from-teal-50 {
+    --tw-gradient-from: rgb(19 78 74 / 0.55) var(--tw-gradient-from-position);
+    --tw-gradient-to: rgb(19 78 74 / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+  }
+
+  .admin-shell.dark .to-white {
+    --tw-gradient-to: rgb(var(--adm-surface)) var(--tw-gradient-to-position);
+  }
+
+  .admin-shell.dark .bg-gradient-to-br.from-teal-50.to-white {
+    background-image: linear-gradient(to bottom right, rgb(19 78 74 / 0.4), rgb(var(--adm-surface))) !important;
+  }
+
+  /* Raw form inputs (FeaturesAdmin etc.) */
+  .admin-shell input.border.rounded-lg,
+  .admin-shell textarea.border.rounded-lg,
+  .admin-shell select.border.rounded-lg {
+    background-color: rgb(var(--adm-input-bg));
+    border-color: rgb(var(--adm-border-input));
+    color: rgb(var(--adm-text));
+  }
+
+  .admin-shell input.border.rounded-lg:focus,
+  .admin-shell textarea.border.rounded-lg:focus,
+  .admin-shell select.border.rounded-lg:focus {
+    outline: none;
+    border-color: rgb(20 184 166);
+    box-shadow: 0 0 0 2px rgb(20 184 166 / 0.25);
+  }
+
+  /* Card shadows in dark mode */
+  .admin-shell.dark .shadow-md,
+  .admin-shell.dark .shadow-lg,
+  .admin-shell.dark .shadow-xl {
+    --tw-shadow-color: rgb(0 0 0 / 0.35);
+  }
+
+  .admin-banner {
+    @apply relative overflow-hidden rounded-2xl p-5 sm:p-6 lg:p-8;
+    background: linear-gradient(to bottom right, #0c1222, #1a2332, #134e4a);
+  }
+
+  .admin-input {
+    background-color: rgb(var(--adm-input-bg));
+    border: 1px solid rgb(var(--adm-border-input));
+    color: rgb(var(--adm-text));
+    @apply w-full px-4 py-2.5 rounded-xl text-sm
+      focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all;
+  }
+
+  .admin-input::placeholder {
+    color: rgb(var(--adm-text-faint));
+  }
+
+  .admin-shell.dark .admin-input {
+    @apply focus:ring-teal-400 focus:border-teal-400;
+  }
+
+  .admin-table {
+    @apply w-full text-sm;
+  }
+
+  .admin-table thead {
+    background-color: rgb(var(--adm-table-head));
+    border-bottom: 1px solid rgb(var(--adm-border));
+  }
+
+  .admin-table th {
+    color: rgb(var(--adm-text-muted));
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider;
+  }
+
+  .admin-table td {
+    color: rgb(var(--adm-text-2));
+    border-bottom: 1px solid rgb(var(--adm-border-light));
+    @apply px-4 py-3.5;
+  }
+
+  .admin-table tbody tr {
+    @apply transition-colors;
+  }
+
+  .admin-table tbody tr:hover {
+    background-color: rgb(var(--adm-surface-hover) / 0.6);
+  }
+
+  .data-table-wrap {
+    @apply w-full;
+  }
+
+  .data-table-toolbar {
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4;
+  }
+
+  .data-table {
+    @apply w-full text-sm min-w-[640px];
+  }
+
+  .data-table thead {
+    background-color: rgb(var(--adm-table-head));
+    border-bottom: 1px solid rgb(var(--adm-border));
+  }
+
+  .data-table th {
+    color: rgb(var(--adm-text-muted));
+    @apply px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider whitespace-nowrap;
+  }
+
+  .data-table td {
+    color: rgb(var(--adm-text-2));
+    border-bottom: 1px solid rgb(var(--adm-border-light));
+    @apply px-4 py-3.5 align-middle;
+  }
+
+  .data-table tbody tr {
+    @apply transition-colors;
+  }
+
+  .data-table tbody tr:nth-child(even) {
+    background-color: rgb(var(--adm-table-row-even) / 0.5);
+  }
+
+  .data-table tbody tr:hover {
+    background-color: rgb(var(--adm-table-hover) / 0.35);
+  }
+
+  .data-table tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  .data-table-footer {
+    background-color: rgb(var(--adm-table-head));
+    border-top: 1px solid rgb(var(--adm-border));
+    @apply flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3;
+  }
+
+  .data-table-page-btn {
+    background-color: rgb(var(--adm-surface));
+    border: 1px solid rgb(var(--adm-border));
+    color: rgb(var(--adm-text-3));
+    @apply min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium
+      disabled:opacity-40 disabled:cursor-not-allowed transition-colors;
+  }
+
+  .data-table-page-btn:hover:not(:disabled) {
+    background-color: rgb(var(--adm-surface-hover));
+  }
+
+  .data-table-actions {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .data-table-action {
+    @apply text-xs font-semibold px-2.5 py-1 rounded-md transition-colors;
+  }
+
+  .data-table-action-edit {
+    @apply text-teal-700 hover:bg-teal-50;
+  }
+
+  .admin-shell.dark .data-table-action-edit {
+    color: rgb(45 212 191);
+  }
+
+  .admin-shell.dark .data-table-action-edit:hover {
+    background-color: rgb(19 78 74 / 0.35);
+  }
+
+  .data-table-action-delete {
+    @apply text-rose-600 hover:bg-rose-50;
+  }
+
+  .admin-shell.dark .data-table-action-delete {
+    color: rgb(251 113 133);
+  }
+
+  .admin-shell.dark .data-table-action-delete:hover {
+    background-color: rgb(76 5 25 / 0.35);
+  }
+
+  .data-table-action-secondary {
+    border: 1px solid rgb(var(--adm-border));
+    color: rgb(var(--adm-text-3));
+    @apply hover:bg-slate-100;
+  }
+
+  .admin-shell.dark .data-table-action-secondary:hover {
+    background-color: rgb(var(--adm-surface-hover));
+  }
+
+  /* Remap common Tailwind utilities inside admin shell (light + dark via CSS vars) */
+  .admin-shell .bg-white {
+    background-color: rgb(var(--adm-surface)) !important;
+  }
+
+  .admin-shell .bg-slate-50 {
+    background-color: rgb(var(--adm-surface-2)) !important;
+  }
+
+  .admin-shell .bg-slate-100 {
+    background-color: rgb(var(--adm-bg)) !important;
+  }
+
+  .admin-shell .text-slate-900 {
+    color: rgb(var(--adm-text)) !important;
+  }
+
+  .admin-shell .text-slate-800 {
+    color: rgb(var(--adm-text)) !important;
+  }
+
+  .admin-shell .text-slate-700 {
+    color: rgb(var(--adm-text-2)) !important;
+  }
+
+  .admin-shell .text-slate-600 {
+    color: rgb(var(--adm-text-3)) !important;
+  }
+
+  .admin-shell .text-slate-500 {
+    color: rgb(var(--adm-text-muted)) !important;
+  }
+
+  .admin-shell .text-slate-400 {
+    color: rgb(var(--adm-text-faint)) !important;
+  }
+
+  .admin-shell .border-slate-200,
+  .admin-shell .border-stone-200 {
+    border-color: rgb(var(--adm-border)) !important;
+  }
+
+  .admin-shell .border-slate-100 {
+    border-color: rgb(var(--adm-border-light)) !important;
+  }
+
+  .admin-shell .border-slate-300 {
+    border-color: rgb(var(--adm-border-input)) !important;
+  }
+
+  .admin-shell .hover\:bg-slate-50:hover {
+    background-color: rgb(var(--adm-surface-hover) / 0.6) !important;
+  }
+
+  .admin-shell .hover\:bg-slate-100:hover {
+    background-color: rgb(var(--adm-surface-hover)) !important;
+  }
+
+  .admin-shell .skeleton {
+    background-color: rgb(var(--adm-border));
+  }
+
+  .admin-shell select option {
+    background-color: rgb(var(--adm-surface));
+    color: rgb(var(--adm-text));
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* Breaking news ticker */
+/* Hide sticky mobile ad while site menu is open */
+body.mobile-menu-open .mobile-sticky-ad {
+  display: none;
+}
+
 .ticker-wrap {
   overflow: hidden;
   white-space: nowrap;
@@ -89,6 +704,14 @@
 .ticker-content {
   display: inline-block;
   animation: ticker 40s linear infinite;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-content {
+    animation: none;
+  }
 }
 
 @keyframes ticker {
@@ -96,8 +719,45 @@
   100% { transform: translateX(-100%); }
 }
 
-/* Quill editor styles */
+.article-editor .ql-toolbar {
+  background-color: rgb(var(--adm-surface-2, 248 250 252));
+  border-color: rgb(var(--adm-border-input, 203 213 225));
+  @apply rounded-t-xl flex flex-wrap border;
+}
+
+.article-editor .ql-container {
+  background-color: rgb(var(--adm-input-bg, 255 255 255));
+  border-color: rgb(var(--adm-border-input, 203 213 225));
+  color: rgb(var(--adm-text, 15 23 42));
+  @apply rounded-b-xl text-sm border;
+}
+
+.admin-shell.dark .article-editor .ql-stroke {
+  stroke: #94a3b8;
+}
+
+.admin-shell.dark .article-editor .ql-fill {
+  fill: #94a3b8;
+}
+
+.admin-shell.dark .article-editor .ql-picker-label {
+  color: #cbd5e1;
+}
+
+/* Admin toast notifications in dark theme */
+body.admin-theme-dark .react-hot-toast > div {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border: 1px solid #334155 !important;
+}
+
 .ql-editor {
-  min-height: 300px;
+  min-height: 280px;
   font-family: 'Noto Sans Tamil', sans-serif;
+}
+
+@media (min-width: 640px) {
+  .ql-editor {
+    min-height: 360px;
+  }
 }

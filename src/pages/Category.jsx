@@ -5,6 +5,8 @@ import { articleService } from '../services/articleService';
 import NewsCard from '../components/NewsCard';
 import { SkeletonCard } from '../components/Loading';
 import Advertisement from '../components/Advertisement';
+import AdSenseSlot from '../components/AdSenseSlot';
+import SportsWidgets from '../components/SportsWidgets';
 
 const CATEGORY_TITLES = {
   'tamil-nadu': 'தமிழ்நாடு',
@@ -66,6 +68,10 @@ const Category = () => {
         <h1 className="text-2xl md:text-3xl font-bold font-headline text-news-dark mb-6">{title}</h1>
 
         <Advertisement position="top_banner" className="mb-6" />
+        <AdSenseSlot location="top_banner" page="category" category={categorySlug} className="mb-6" />
+        <AdSenseSlot location="sidebar" page="category" category={categorySlug} className="mb-6" />
+
+        {categorySlug === 'sports' && <SportsWidgets page="category" className="mb-6" />}
 
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

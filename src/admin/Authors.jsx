@@ -1,18 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { authorService } from '../services/articleService';
 import toast from 'react-hot-toast';
+import AdminPageHeader from './AdminPageHeader';
+import DataTable from './DataTable';
+import { getImageUrl } from '../utils/helpers';
+
+const emptyForm = { name: '', slug: '', designation: '', bio: '', profileImage: '', status: 'active' };
 
 const Authors = () => {
   const [authors, setAuthors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: '', slug: '', designation: '', bio: '', profileImage: '', status: 'active' });
+  const [form, setForm] = useState(emptyForm);
   const [editId, setEditId] = useState(null);
 
   const fetchAuthors = () => {
-    authorService.getAllAdmin().then(({ data }) => setAuthors(data.data || []));
+    setLoading(true);
+    authorService.getAllAdmin()
+      .then(({ data }) => setAuthors(data.data || []))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchAuthors(); }, []);
+
+  const resetForm = () => {
+    setForm(emptyForm);
+    setEditId(null);
+    setShowForm(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,52 +39,98 @@ const Authors = () => {
         await authorService.create(form);
         toast.success('Author created');
       }
-      setShowForm(false);
-      setEditId(null);
+      resetForm();
       fetchAuthors();
     } catch {
       toast.error('Failed to save');
     }
   };
 
+  const openEdit = (author) => {
+    setForm({
+      name: author.name,
+      slug: author.slug,
+      designation: author.designation || '',
+      bio: author.bio || '',
+      profileImage: author.profileImage || '',
+      status: author.status || 'active',
+    });
+    setEditId(author._id);
+    setShowForm(true);
+  };
+
+  const columns = useMemo(() => [
+    {
+      key: 'profileImage',
+      header: 'Photo',
+      render: (row) => (
+        <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+          {row.profileImage ? (
+            <img src={getImageUrl(row.profileImage)} alt={row.name} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-brand-600 font-bold">{row.name?.charAt(0)}</div>
+          )}
+        </div>
+      ),
+    },
+    { key: 'name', header: 'Name', sortable: true, render: (row) => <span className="font-medium text-slate-900">{row.name}</span> },
+    { key: 'designation', header: 'Designation', sortable: true, render: (row) => <span className="text-brand-600">{row.designation || '-'}</span> },
+    { key: 'slug', header: 'Slug', sortable: true, render: (row) => <code className="text-xs bg-slate-100 px-2 py-0.5 rounded">{row.slug}</code> },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      render: (row) => (
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+          {row.status}
+        </span>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      render: (row) => (
+        <button type="button" onClick={() => openEdit(row)} className="data-table-action data-table-action-edit">
+          Edit
+        </button>
+      ),
+    },
+  ], []);
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Authors</h1>
-        <button onClick={() => setShowForm(true)} className="btn-primary">+ Add Author</button>
-      </div>
+      <AdminPageHeader
+        title="Authors"
+        subtitle="Manage reporters and writers"
+        actionLabel={showForm ? undefined : '+ Add Author'}
+        onAction={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }}
+      />
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-4 mb-6 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="px-3 py-2 border rounded-md text-sm" />
-            <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="px-3 py-2 border rounded-md text-sm" />
-            <input placeholder="Designation" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="px-3 py-2 border rounded-md text-sm" />
-            <input placeholder="Profile Image URL" value={form.profileImage} onChange={(e) => setForm({ ...form, profileImage: e.target.value })} className="px-3 py-2 border rounded-md text-sm" />
+        <form onSubmit={handleSubmit} className="admin-card mb-6">
+          <h2 className="font-semibold text-slate-900 mb-4">{editId ? 'Edit Author' : 'New Author'}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="admin-input" />
+            <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="admin-input" />
+            <input placeholder="Designation" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="admin-input" />
+            <input placeholder="Profile Image URL" value={form.profileImage} onChange={(e) => setForm({ ...form, profileImage: e.target.value })} className="admin-input" />
           </div>
-          <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={2} className="w-full px-3 py-2 border rounded-md text-sm" />
-          <div className="flex gap-2">
+          <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} className="admin-input mt-4" />
+          <div className="flex flex-col sm:flex-row gap-2 mt-4">
             <button type="submit" className="btn-primary text-sm">Save</button>
-            <button type="button" onClick={() => setShowForm(false)} className="btn-secondary text-sm">Cancel</button>
+            <button type="button" onClick={resetForm} className="btn-secondary text-sm">Cancel</button>
           </div>
         </form>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {authors.map((author) => (
-          <div key={author._id} className="bg-white rounded-xl shadow-sm p-4">
-            <h3 className="font-bold">{author.name}</h3>
-            <p className="text-sm text-brand-600">{author.designation}</p>
-            <p className="text-xs text-gray-500 mt-1">{author.slug}</p>
-            <button
-              onClick={() => { setForm(author); setEditId(author._id); setShowForm(true); }}
-              className="text-brand-600 text-xs mt-2"
-            >
-              Edit
-            </button>
-          </div>
-        ))}
-      </div>
+      <DataTable
+        columns={columns}
+        data={authors}
+        loading={loading}
+        searchPlaceholder="Search authors..."
+        searchKeys={['name', 'designation', 'slug']}
+        emptyMessage="No authors found"
+      />
     </div>
   );
 };

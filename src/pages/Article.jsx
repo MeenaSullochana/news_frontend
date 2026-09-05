@@ -1,19 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { articleService } from '../services/articleService';
+import { articleService, googleNewsService } from '../services/articleService';
 import { sanitizeHtml, generateArticleJsonLd } from '../utils/sanitize';
+import GoogleNewsArticleView from '../components/GoogleNewsArticleView';
 import { formatDateTime } from '../utils/helpers';
-import { getImageUrl } from '../utils/images';
+import { getImageUrl, getMediaUrl } from '../utils/images';
+import { getYoutubeEmbedUrl } from '../utils/youtube';
 import NewsImage from '../components/NewsImage';
 import ShareButtons from '../components/ShareButtons';
 import RelatedNews from '../components/RelatedNews';
 import Advertisement from '../components/Advertisement';
+import AdSenseSlot from '../components/AdSenseSlot';
 import Loading from '../components/Loading';
 
 const Article = () => {
   const { slug } = useParams();
   const [article, setArticle] = useState(null);
+  const [googleNews, setGoogleNews] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,21 +25,32 @@ const Article = () => {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setArticle(null);
+    setGoogleNews(null);
+    setRelated([]);
 
-    Promise.all([
-      articleService.getBySlug(slug),
-      articleService.getRelated(slug),
-    ])
-      .then(([articleRes, relatedRes]) => {
+    articleService
+      .getBySlug(slug)
+      .then((articleRes) => {
         setArticle(articleRes.data.data);
-        setRelated(relatedRes.data.data || []);
+        return articleService.getRelated(slug);
       })
-      .catch(() => setError('Article not found'))
+      .then((relatedRes) => setRelated(relatedRes.data.data || []))
+      .catch(() => {
+        googleNewsService
+          .getBySlug(slug)
+          .then(({ data }) => {
+            setGoogleNews(data.data);
+            return googleNewsService.getRelated(slug);
+          })
+          .then(({ data }) => setRelated(data.data || []))
+          .catch(() => setError('Article not found'));
+      })
       .finally(() => setLoading(false));
   }, [slug]);
 
   if (loading) return <Loading />;
-  if (error || !article) {
+  if (error || (!article && !googleNews)) {
     return (
       <div className="container-news py-16 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Article Not Found</h1>
@@ -44,7 +59,13 @@ const Article = () => {
     );
   }
 
+  if (googleNews) {
+    return <GoogleNewsArticleView item={googleNews} related={related} />;
+  }
+
   const jsonLd = generateArticleJsonLd(article);
+  const youtubeEmbed = getYoutubeEmbedUrl(article.youtubeVideoLink);
+  const audioUrl = getMediaUrl(article.audioReader);
 
   return (
     <>
@@ -85,6 +106,13 @@ const Article = () => {
           </span>
         )}
 
+        {article.isMustWatch && (
+          <span className="inline-flex items-center gap-1.5 ml-0 mb-2 mr-2 px-2.5 py-1 rounded-full bg-red-600 text-white text-xs font-bold uppercase tracking-wide">
+            <span aria-hidden>▶</span>
+            Must Watch
+          </span>
+        )}
+
         <h1 className="text-2xl md:text-4xl font-bold font-headline text-news-dark leading-tight mb-4">
           {article.title}
         </h1>
@@ -112,6 +140,12 @@ const Article = () => {
         </div>
 
         <Advertisement position="article_top" className="mb-6" />
+        <AdSenseSlot
+          location="article_top"
+          page="article"
+          category={article.category?.slug || ''}
+          className="mb-6"
+        />
 
         {article.isLive && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
@@ -147,6 +181,30 @@ const Article = () => {
             )}
         </figure>
 
+        {audioUrl && (
+          <div className="mb-6 rounded-xl border border-stone-200 bg-stone-50 p-4">
+            <p className="text-sm font-semibold text-slate-800 mb-2">Audio Reader</p>
+            <audio controls preload="metadata" className="w-full" src={audioUrl}>
+              Your browser does not support audio playback.
+            </audio>
+          </div>
+        )}
+
+        {youtubeEmbed && (
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-slate-800 mb-2">YouTube Video</p>
+            <div className="aspect-video rounded-xl overflow-hidden bg-black shadow-sm">
+              <iframe
+                title={`${article.title} — YouTube video`}
+                src={youtubeEmbed}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div
@@ -155,6 +213,12 @@ const Article = () => {
             />
 
             <Advertisement position="article_middle" className="my-8" />
+            <AdSenseSlot
+              location="article_middle"
+              page="article"
+              category={article.category?.slug || ''}
+              className="my-8"
+            />
 
             {article.tags?.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t">
@@ -179,11 +243,22 @@ const Article = () => {
             <div className="sticky top-24">
               <ShareButtons title={article.title} />
               <Advertisement position="sidebar" className="mt-6" />
+              <AdSenseSlot
+                location="sidebar"
+                page="article"
+                category={article.category?.slug || ''}
+                className="mt-6"
+              />
             </div>
           </aside>
         </div>
 
-        <Advertisement position="article_bottom" className="mt-8" />
+        <AdSenseSlot
+          location="article_bottom"
+          page="article"
+          category={article.category?.slug || ''}
+          className="mt-8"
+        />
         <RelatedNews articles={related} />
       </article>
     </>
