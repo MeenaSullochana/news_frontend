@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import AdminPageHeader from './AdminPageHeader';
 import DataTable from './DataTable';
 import { getImageUrl } from '../utils/helpers';
+import ImageUploadField from '../components/ImageUploadField';
 
 const emptyForm = { name: '', slug: '', designation: '', bio: '', profileImage: '', status: 'active' };
 
@@ -113,7 +114,15 @@ const Authors = () => {
             <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required className="admin-input" />
             <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="admin-input" />
             <input placeholder="Designation" value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })} className="admin-input" />
-            <input placeholder="Profile Image URL" value={form.profileImage} onChange={(e) => setForm({ ...form, profileImage: e.target.value })} className="admin-input" />
+            <div className="sm:col-span-2">
+              <ImageUploadField
+                value={form.profileImage}
+                onChange={(url) => setForm({ ...form, profileImage: url })}
+                placeholder="Profile Image URL"
+                seed={editId || form.slug || 'author'}
+                previewClassName="w-20 h-20 rounded-full object-cover border border-slate-200"
+              />
+            </div>
           </div>
           <textarea placeholder="Bio" value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} rows={3} className="admin-input mt-4" />
           <div className="flex flex-col sm:flex-row gap-2 mt-4">

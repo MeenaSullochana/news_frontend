@@ -12,6 +12,7 @@ const BreakingNewsAdmin = () => {
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [editViews, setEditViews] = useState(0);
 
   const fetchItems = () => {
     setLoading(true);
@@ -25,6 +26,7 @@ const BreakingNewsAdmin = () => {
   const resetForm = () => {
     setForm(emptyForm);
     setEditId(null);
+    setEditViews(0);
     setShowForm(false);
   };
 
@@ -67,6 +69,7 @@ const BreakingNewsAdmin = () => {
       endTime: item.endTime ? item.endTime.slice(0, 16) : '',
     });
     setEditId(item._id);
+    setEditViews(item.views || 0);
     setShowForm(true);
   };
 
@@ -104,6 +107,17 @@ const BreakingNewsAdmin = () => {
       ),
     },
     {
+      key: 'views',
+      header: 'Website Views',
+      sortable: true,
+      sortValue: (row) => row.views || 0,
+      render: (row) => (
+        <span className="font-medium tabular-nums text-slate-800">
+          {(row.views || 0).toLocaleString('en-IN')}
+        </span>
+      ),
+    },
+    {
       key: 'actions',
       header: 'Actions',
       render: (row) => (
@@ -124,7 +138,7 @@ const BreakingNewsAdmin = () => {
         title="Breaking News"
         subtitle="Ticker headlines on the homepage"
         actionLabel={showForm ? undefined : '+ Add Breaking News'}
-        onAction={() => { setShowForm(true); setEditId(null); setForm(emptyForm); }}
+        onAction={() => { setShowForm(true); setEditId(null); setEditViews(0); setForm(emptyForm); }}
       />
 
       {showForm && (
@@ -141,6 +155,15 @@ const BreakingNewsAdmin = () => {
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="rounded border-slate-300 text-brand-600" />
               Active
             </label>
+            {editId && (
+              <p className="text-sm text-slate-600">
+                Website views:{' '}
+                <span className="font-semibold tabular-nums text-slate-900">
+                  {editViews.toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs text-slate-400 ml-2">(automatic — counted when shown on the website)</span>
+              </p>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row gap-2 mt-4">
             <button type="submit" className="btn-primary text-sm">Save</button>

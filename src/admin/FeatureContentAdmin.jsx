@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { featureService } from '../services/articleService';
 import AdminPageHeader, { StatusBadge } from './AdminPageHeader';
 import DataTable from './DataTable';
+import ImageUploadField from '../components/ImageUploadField';
 
 const emptyItem = {
   featureKey: 'jobs',
@@ -237,9 +238,17 @@ const FeatureContentAdmin = () => {
               <span className="text-slate-600">Subtitle</span>
               <input className="mt-1 w-full border rounded-lg px-3 py-2" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} />
             </label>
-            <label className="block text-sm">
-              <span className="text-slate-600">Image URL</span>
-              <input className="mt-1 w-full border rounded-lg px-3 py-2" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+            <label className="block text-sm sm:col-span-2">
+              <span className="text-slate-600">Image</span>
+              <div className="mt-1">
+                <ImageUploadField
+                  value={form.image}
+                  onChange={(url) => setForm({ ...form, image: url })}
+                  placeholder="Image URL"
+                  inputClassName="w-full border rounded-lg px-3 py-2"
+                  seed={editingId || 'feature'}
+                />
+              </div>
             </label>
             <label className="block text-sm">
               <span className="text-slate-600">Link</span>

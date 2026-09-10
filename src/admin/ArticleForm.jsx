@@ -10,6 +10,7 @@ import {
   mediaService,
 } from '../services/articleService';
 import { getMediaUrl } from '../utils/images';
+import ImageUploadField from '../components/ImageUploadField';
 import GeminiGeneratePanel from './GeminiGeneratePanel';
 
 const STATUS_OPTIONS = ['DRAFT', 'PENDING', 'PUBLISHED', 'SCHEDULED'];
@@ -189,14 +190,45 @@ const ArticleForm = () => {
   const quillModules = useMemo(
     () => ({
       toolbar: [
-        [{ header: [1, 2, 3, false] }],
-        ['bold', 'italic', 'underline'],
-        [{ list: 'ordered' }, { list: 'bullet' }],
+        [{ header: [1, 2, 3, 4, 5, 6, false] }],
+        [{ font: [] }],
+        [{ size: ['small', false, 'large', 'huge'] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ script: 'sub' }, { script: 'super' }],
+        [{ color: [] }, { background: [] }],
+        [{ align: [] }],
+        [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+        [{ direction: 'rtl' }],
+        ['blockquote', 'code-block'],
         ['link', 'image', 'video'],
-        ['blockquote'],
         ['clean'],
       ],
     }),
+    []
+  );
+
+  const quillFormats = useMemo(
+    () => [
+      'header',
+      'font',
+      'size',
+      'bold',
+      'italic',
+      'underline',
+      'strike',
+      'script',
+      'color',
+      'background',
+      'align',
+      'direction',
+      'list',
+      'indent',
+      'blockquote',
+      'code-block',
+      'link',
+      'image',
+      'video',
+    ],
     []
   );
 
@@ -288,7 +320,13 @@ const ArticleForm = () => {
             <div className="admin-card">
               <label className={labelClass}>Content *</label>
               <div className="article-editor">
-                <ReactQuill theme="snow" value={form.content} onChange={(val) => setForm((p) => ({ ...p, content: val }))} modules={quillModules} />
+                <ReactQuill
+                  theme="snow"
+                  value={form.content}
+                  onChange={(val) => setForm((p) => ({ ...p, content: val }))}
+                  modules={quillModules}
+                  formats={quillFormats}
+                />
               </div>
             </div>
 
@@ -427,7 +465,12 @@ const ArticleForm = () => {
 
             <div className="admin-card space-y-3">
               <h3 className="font-semibold text-slate-900">Featured Image</h3>
-              <input name="featuredImage" value={form.featuredImage} onChange={handleChange} className="admin-input" placeholder="Image URL" />
+              <ImageUploadField
+                value={form.featuredImage}
+                onChange={(url) => setForm((prev) => ({ ...prev, featuredImage: url }))}
+                placeholder="Image URL"
+                seed={form.slug || id || 'featured'}
+              />
               <input name="imageAlt" value={form.imageAlt} onChange={handleChange} className="admin-input" placeholder="Alt text" />
               <input name="imageCaption" value={form.imageCaption} onChange={handleChange} className="admin-input" placeholder="Caption" />
             </div>

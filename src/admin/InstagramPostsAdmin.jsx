@@ -4,6 +4,7 @@ import { instagramPostService } from '../services/articleService';
 import { getImageUrl } from '../utils/images';
 import { useAuth } from '../context/AuthContext';
 import AdminPageHeader from './AdminPageHeader';
+import ImageUploadField from '../components/ImageUploadField';
 
 const emptyEdit = {
   title: '',
@@ -327,7 +328,13 @@ const InstagramPostsAdmin = () => {
                   <textarea className="admin-input" rows={2} placeholder="Description" value={edit.description} onChange={(e) => setEdit({ ...edit, description: e.target.value })} />
                   <textarea className="admin-input" rows={2} placeholder="Caption" value={edit.caption} onChange={(e) => setEdit({ ...edit, caption: e.target.value })} />
                   <input className="admin-input" placeholder="Category" value={edit.category} onChange={(e) => setEdit({ ...edit, category: e.target.value })} />
-                  <input className="admin-input" placeholder="Image URL" value={edit.image} onChange={(e) => setEdit({ ...edit, image: e.target.value })} />
+                  <ImageUploadField
+                    value={edit.image}
+                    onChange={(url) => setEdit({ ...edit, image: url })}
+                    placeholder="Image URL"
+                    showPreview={false}
+                    seed={edit._id || 'instagram'}
+                  />
                   <select className="admin-input" value={edit.status} onChange={(e) => setEdit({ ...edit, status: e.target.value })}>
                     <option value="published">Published</option>
                     <option value="draft">Draft</option>

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { marketplaceService } from '../services/articleService';
+import ImageUploadField from '../components/ImageUploadField';
 
 const empty = {
   title: '',
@@ -100,10 +101,18 @@ const SellerProductForm = () => {
             </select>
           </label>
         </div>
-        <label className="block text-sm">
-          <span className="text-slate-600">Image URL</span>
-          <input className="mt-1 w-full border rounded-xl px-3 py-2.5" placeholder="https://…" value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} />
-        </label>
+        <div>
+          <span className="text-sm text-slate-600">Product image</span>
+          <div className="mt-1">
+            <ImageUploadField
+              value={form.image}
+              onChange={(url) => setForm({ ...form, image: url })}
+              placeholder="https://…"
+              inputClassName="w-full border rounded-xl px-3 py-2.5"
+              seed={id || 'product'}
+            />
+          </div>
+        </div>
         <div className="flex gap-2 pt-2">
           <button type="submit" disabled={loading} className="btn-primary">{loading ? 'Saving…' : isEdit ? 'Save changes' : 'Submit for review'}</button>
           <Link to="/seller/products" className="btn-secondary">Cancel</Link>

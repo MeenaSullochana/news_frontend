@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import AdminPageHeader, { StatusBadge } from './AdminPageHeader';
 import DataTable from './DataTable';
 import NewsImage from '../components/NewsImage';
+import ImageUploadField from '../components/ImageUploadField';
 
 const AD_POSITIONS = [
   'header', 'top_banner', 'homepage_top', 'homepage_middle',
@@ -73,7 +74,7 @@ const Advertisements = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (form.type === 'image' && !form.image?.trim()) {
-      toast.error('Image URL is required for image ads');
+      toast.error('Image is required for image ads');
       return;
     }
     if (form.type === 'code' && !form.code?.trim()) {
@@ -296,12 +297,13 @@ const Advertisements = () => {
             </div>
             {form.type === 'image' ? (
               <>
-                <input
-                  placeholder="Image URL"
+                <ImageUploadField
                   value={form.image}
-                  onChange={(e) => setForm({ ...form, image: e.target.value })}
+                  onChange={(url) => setForm({ ...form, image: url })}
+                  placeholder="Image URL"
                   required
-                  className="admin-input"
+                  seed={editingId || 'ad-preview'}
+                  showPreview={false}
                 />
                 <input
                   placeholder="Link URL (optional)"

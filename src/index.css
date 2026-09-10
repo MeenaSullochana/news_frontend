@@ -87,7 +87,10 @@
 
   .article-content h1,
   .article-content h2,
-  .article-content h3 {
+  .article-content h3,
+  .article-content h4,
+  .article-content h5,
+  .article-content h6 {
     @apply font-headline font-bold text-slate-900 mt-6 mb-3;
   }
 
@@ -115,6 +118,32 @@
   .article-content td {
     @apply border border-stone-200 px-3 py-2 text-sm;
   }
+
+  .article-content pre.ql-syntax,
+  .article-content pre {
+    @apply bg-slate-900 text-slate-100 rounded-xl p-4 my-4 overflow-x-auto text-sm;
+  }
+
+  .article-content .ql-align-center { text-align: center; }
+  .article-content .ql-align-right { text-align: right; }
+  .article-content .ql-align-justify { text-align: justify; }
+  .article-content .ql-direction-rtl { direction: rtl; text-align: inherit; }
+
+  .article-content .ql-size-small { font-size: 0.75em; }
+  .article-content .ql-size-large { font-size: 1.5em; }
+  .article-content .ql-size-huge { font-size: 2.5em; }
+
+  .article-content .ql-font-serif { font-family: Georgia, 'Times New Roman', serif; }
+  .article-content .ql-font-monospace { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+  .article-content .ql-indent-1 { padding-left: 3em; }
+  .article-content .ql-indent-2 { padding-left: 6em; }
+  .article-content .ql-indent-3 { padding-left: 9em; }
+  .article-content .ql-indent-4 { padding-left: 12em; }
+  .article-content .ql-indent-5 { padding-left: 15em; }
+  .article-content .ql-indent-6 { padding-left: 18em; }
+  .article-content .ql-indent-7 { padding-left: 21em; }
+  .article-content .ql-indent-8 { padding-left: 24em; }
 
   .skeleton {
     @apply animate-pulse bg-stone-200 rounded-2xl;
@@ -723,6 +752,14 @@ body.mobile-menu-open .mobile-sticky-ad {
   background-color: rgb(var(--adm-surface-2, 248 250 252));
   border-color: rgb(var(--adm-border-input, 203 213 225));
   @apply rounded-t-xl flex flex-wrap border;
+}
+
+.article-editor .ql-toolbar.ql-snow .ql-formats {
+  margin-right: 10px;
+}
+
+.article-editor .ql-snow .ql-picker.ql-expanded .ql-picker-options {
+  z-index: 30;
 }
 
 .article-editor .ql-container {

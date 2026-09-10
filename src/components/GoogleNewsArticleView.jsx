@@ -53,12 +53,6 @@ const GoogleNewsArticleView = ({ item, related = [] }) => {
           {item.sourceName && <span className="font-medium text-gray-700">{item.sourceName}</span>}
           <span>•</span>
           <time dateTime={item.publishedAt}>{formatDateTime(item.publishedAt)}</time>
-          {item.views > 0 && (
-            <>
-              <span>•</span>
-              <span>{item.views} views</span>
-            </>
-          )}
         </div>
 
         {hasImage && (

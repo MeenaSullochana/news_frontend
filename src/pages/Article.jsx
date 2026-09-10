@@ -131,12 +131,6 @@ const Article = () => {
               <span>Updated: {formatDateTime(article.updatedAt)}</span>
             </>
           )}
-          {article.views > 0 && (
-            <>
-              <span>•</span>
-              <span>{article.views} views</span>
-            </>
-          )}
         </div>
 
         <Advertisement position="article_top" className="mb-6" />

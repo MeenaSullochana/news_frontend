@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 
 const config = {
   ADD_TAGS: ['iframe'],
-  ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling'],
+  ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling', 'style', 'class', 'target', 'rel'],
 };
 
 export const sanitizeHtml = (html) => {
